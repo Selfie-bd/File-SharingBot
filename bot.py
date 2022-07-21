@@ -56,10 +56,10 @@ class Bot(Client):
         await super().stop()
         self.LOGGER(__name__).info("Bot stopped.")
 
-async def get_shortlink(link, x):
+async def get_shortlink(links, x):
     url = f'https://shorte.st/api'
     params = {'api': API_KEY,
-              'url': link,
+              'url': links,
               'alias': x
               }
 
@@ -71,5 +71,36 @@ async def get_shortlink(link, x):
                 return f"<code>{data['shortenedUrl']}</code>\n\nHere is your Link:\n{data['shortenedUrl']}"
             else:
                 return f"Error: {data['message']}"
+
+
+async def replace_link(text, x):
+    text = await replace_username(text)
+    links = re.findall(r'https?://[^\s]+', text)
+    for link in links:
+
+        if INCLUDE_DOMAIN:
+            include = INCLUDE_DOMAIN.split(',')
+            domain = [domain.strip() for domain in include]
+            if any(i in link for i in domain):
+                short_link = await get_shortlink(link, x)
+                text = text.replace(link, short_link)
+
+
+        elif EXCLUDE_DOMAIN:
+            exclude = EXCLUDE_DOMAIN.split(',')
+            domain = [domain.strip() for domain in exclude]
+            if any(i in link for i in domain):
+                pass
+            else:
+                short_link = await get_shortlink(link, x)
+
+                text = text.replace(link, short_link)
+
+        else:
+            short_link = await get_shortlink(link, x)
+
+            text = text.replace(link, short_link)
+
+    return text
 
 bot.run()
