@@ -71,5 +71,3 @@ async def get_shortlink(link, x):
                 return f"<code>{data['shortenedUrl']}</code>\n\nHere is your Link:\n{data['shortenedUrl']}"
             else:
                 return f"Error: {data['message']}"
-
-bot.run()
