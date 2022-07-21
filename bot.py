@@ -4,7 +4,7 @@ import pyromod.listen
 from pyrogram import Client
 import sys
 
-from config import API_HASH, APP_ID, LOGGER, TG_BOT_TOKEN, TG_BOT_WORKERS, FORCE_SUB_CHANNEL, CHANNEL_ID
+from config import API_HASH, APP_ID, API_KEY, LOGGER, TG_BOT_TOKEN, TG_BOT_WORKERS, FORCE_SUB_CHANNEL, CHANNEL_ID
 
 class Bot(Client):
     def __init__(self):
@@ -55,3 +55,21 @@ class Bot(Client):
     async def stop(self, *args):
         await super().stop()
         self.LOGGER(__name__).info("Bot stopped.")
+
+async def get_shortlink(link, x):
+    url = f'https://shorte.st/api'
+    params = {'api': API_KEY,
+              'url': link,
+              'alias': x
+              }
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, params=params, raise_for_status=True, ssl=False) as response:
+            data = await response.json()
+            print(data["status"])
+            if data["status"] == "success":
+                return f"<code>{data['shortenedUrl']}</code>\n\nHere is your Link:\n{data['shortenedUrl']}"
+            else:
+                return f"Error: {data['message']}"
+
+bot.run()
